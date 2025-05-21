@@ -32,7 +32,9 @@ class QrService{
           e.error is SocketException) {
         throw '인터넷 연결을 확인해주세요.';
       }
-
+      print("🔗 요청한 URL: ${e.requestOptions.uri}");
+      print("📡 응답 코드: ${e.response?.statusCode}");
+      print("📨 응답 내용: ${e.response?.data}");
       final statusCode = e.response?.statusCode;
       String errorMessage;
       if (statusCode == 401){

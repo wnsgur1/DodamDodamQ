@@ -16,8 +16,11 @@ class MainScreen extends StatelessWidget {
 
     void onQrScanned(String code) async {
       final jsonMap = jsonDecode(code);
-      final memberId = jsonMap['userId'];
+      final memberId = jsonMap['memberId'];
       final nonce = jsonMap['nonce'];
+      print("1123 $jsonMap");
+      print("1123 $memberId");
+      print("1123 $nonce");
 
       if (memberId != null && nonce != null) {
         await viewModel.handleQrScan(memberId, nonce);

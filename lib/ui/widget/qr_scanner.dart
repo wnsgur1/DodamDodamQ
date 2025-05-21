@@ -57,7 +57,7 @@ class _QrScannerState extends State<QrScanner> {
       }
 
       final jsonMap = jsonDecode(code);
-      final memberId = jsonMap['userId'];
+      final memberId = jsonMap['memberId'];
       final nonce = jsonMap['nonce'];
 
       if (memberId != null && nonce != null) {
