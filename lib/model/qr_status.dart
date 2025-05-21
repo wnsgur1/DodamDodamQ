@@ -1,0 +1,2 @@
+
+enum QrScanStatus { SUCCESS, ERROR }
