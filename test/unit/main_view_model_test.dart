@@ -1,39 +1,46 @@
-import 'package:dodamdodam_q/data/repository/qr_repository.dart';
 import 'package:dodamdodam_q/model/qr_request.dart';
 import 'package:dodamdodam_q/model/qr_response.dart';
 import 'package:dodamdodam_q/model/qr_status.dart';
-import 'package:dodamdodam_q/ui/view_model/main_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dodamdodam_q/ui/view_model/main_view_model.dart';
+import 'package:dodamdodam_q/data/repository/qr_repository.dart';
+import 'package:mockito/mockito.dart';
 
-class FakeQrRepository implements QrRepository {
-  @override
-  Future<QrResponse> sendQr(QrRequest request) async {
-    if (request.memberId == 'valid') {
-      return QrResponse(message: '성공', status: 200);
-    } else {
-      return QrResponse(message: '실패', status: 400);
-    }
-  }
-}
+class MockQrRepository extends Mock implements QrRepository {}
 
 void main() {
-  group('MainViewModel', () {
+  group('MainViewModel Unit Tests', () {
     late MainViewModel viewModel;
+    late MockQrRepository mockRepository;
 
     setUp(() {
-      viewModel = MainViewModel(FakeQrRepository());
+      mockRepository = MockQrRepository();
+      viewModel = MainViewModel(mockRepository);
     });
 
-    test('성공적인 QR 처리', () async {
-      await viewModel.handleQrScan('valid', 'nonce');
+    test('handleQrScan sets status to SUCCESS on 200 response', () async {
+      when(mockRepository.sendQr(QrRequest(memberId: "memberId", nonce: "nonce"))).thenAnswer(
+            (_) async => QrResponse(status: 200, message: 'Success'),
+      );
+
+      await viewModel.handleQrScan('member123', 'nonce456');
+
       expect(viewModel.status, QrScanStatus.SUCCESS);
-      expect(viewModel.message, '성공');
+      expect(viewModel.message, 'Success');
     });
 
-    test('실패한 QR 처리', () async {
-      await viewModel.handleQrScan('invalid', 'nonce');
+    test('handleQrScan sets status to ERROR on non-200 response', () async {
+      when(mockRepository.sendQr(QrRequest(memberId: "memberId", nonce: "nonce"))).thenAnswer(
+            (_) async => QrResponse(status: 400, message: 'Error'),
+      );
+
+      await viewModel.handleQrScan('member123', 'nonce456');
+
+
+
+      
       expect(viewModel.status, QrScanStatus.ERROR);
-      expect(viewModel.message, '실패');
+      expect(viewModel.message, 'Error');
     });
   });
 }
