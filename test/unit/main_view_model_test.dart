@@ -18,7 +18,7 @@ void main() {
       viewModel = MainViewModel(mockRepository);
     });
 
-    test('handleQrScan sets status to SUCCESS on 200 response', () async {
+    test('200 응답 시 상태가 SUCCESS로 설정되어야 함', () async {
       when(mockRepository.sendQr(QrRequest(memberId: "memberId", nonce: "nonce"))).thenAnswer(
             (_) async => QrResponse(status: 200, message: 'Success'),
       );
@@ -29,7 +29,7 @@ void main() {
       expect(viewModel.message, 'Success');
     });
 
-    test('handleQrScan sets status to ERROR on non-200 response', () async {
+    test('200 외의 응답 시 상태가 ERROR로 설정되어야 함', () async {
       when(mockRepository.sendQr(QrRequest(memberId: "memberId", nonce: "nonce"))).thenAnswer(
             (_) async => QrResponse(status: 400, message: 'Error'),
       );
