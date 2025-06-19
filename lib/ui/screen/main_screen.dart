@@ -9,21 +9,30 @@ import '../widget/qr_scanner.dart';
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
+  Map<String, String>? _parseQrCode(String code) {
+    try {
+      final jsonMap = jsonDecode(code);
+      final memberId = jsonMap['memberId'] as String?;
+      final nonce = jsonMap['nonce'] as String?;
+
+      if (memberId != null && nonce != null) {
+        return {'memberId': memberId, 'nonce': nonce};
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<MainViewModel>();
 
     void onQrScanned(String code) async {
-      final jsonMap = jsonDecode(code);
-      final memberId = jsonMap['memberId'];
-      final nonce = jsonMap['nonce'];
-      print("1123 $jsonMap");
-      print("1123 $memberId");
-      print("1123 $nonce");
+      final qrData = _parseQrCode(code);
 
-      if (memberId != null && nonce != null) {
-        await viewModel.handleQrScan(memberId, nonce);
+      if (qrData != null) {
+        await viewModel.handleQrScan(qrData['memberId']!, qrData['nonce']!);
 
         final message = viewModel.message ?? '응답 없음';
         final status = viewModel.status;
@@ -55,10 +64,13 @@ class MainScreen extends StatelessWidget {
       body: Stack(
         children: [
           QrScanner(onScan: onQrScanned),
-          Positioned(
+          const Positioned(
             left: 0,
             right: 0,
-            child: const DodamTopAppBar(title: 'QR 스캔', description: 'QR코드는 버스좌석 선택시 확인할 수 있습니다.'),
+            child: DodamTopAppBar(
+              title: 'QR 스캔',
+              description: 'QR코드는 버스좌석 선택시 확인할 수 있습니다.',
+            ),
           ),
         ],
       ),
