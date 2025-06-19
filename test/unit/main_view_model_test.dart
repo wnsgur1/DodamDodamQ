@@ -18,10 +18,11 @@ void main() {
       viewModel = MainViewModel(mockRepository);
     });
 
-    test('200 응답 시 상태가 SUCCESS로 설정되어야 함', () async {
-      when(mockRepository.sendQr(QrRequest(memberId: "memberId", nonce: "nonce"))).thenAnswer(
-            (_) async => QrResponse(status: 200, message: 'Success'),
-      );
+    test('handleQrScan sets status to SUCCESS on 200 response', () async {
+      // 정확한 QrRequest 객체로 매칭
+      final expectedRequest = QrRequest(memberId: 'member123', nonce: 'nonce456');
+      when(mockRepository.sendQr(expectedRequest))
+          .thenAnswer((_) async => QrResponse(status: 200, message: 'Success'));
 
       await viewModel.handleQrScan('member123', 'nonce456');
 
@@ -29,18 +30,33 @@ void main() {
       expect(viewModel.message, 'Success');
     });
 
-    test('200 외의 응답 시 상태가 ERROR로 설정되어야 함', () async {
-      when(mockRepository.sendQr(QrRequest(memberId: "memberId", nonce: "nonce"))).thenAnswer(
-            (_) async => QrResponse(status: 400, message: 'Error'),
-      );
+    test('handleQrScan sets status to ERROR on non-200 response', () async {
+      final expectedRequest = QrRequest(memberId: 'member123', nonce: 'nonce456');
+      when(mockRepository.sendQr(expectedRequest))
+          .thenAnswer((_) async => QrResponse(status: 400, message: 'Error'));
 
       await viewModel.handleQrScan('member123', 'nonce456');
 
-
-
-      
       expect(viewModel.status, QrScanStatus.ERROR);
       expect(viewModel.message, 'Error');
+    });
+
+    test('handleQrScan sets status to ERROR on exception', () async {
+      final expectedRequest = QrRequest(memberId: 'member123', nonce: 'nonce456');
+      when(mockRepository.sendQr(expectedRequest))
+          .thenThrow('Network error');
+
+      await viewModel.handleQrScan('member123', 'nonce456');
+
+      expect(viewModel.status, QrScanStatus.ERROR);
+      expect(viewModel.message, 'Network error');
+    });
+
+    test('reset clears status and message', () {
+      viewModel.reset();
+
+      expect(viewModel.status, isNull);
+      expect(viewModel.message, isNull);
     });
   });
 }
